@@ -15,11 +15,19 @@ const transporter = nodemailer.createTransport({
 
 
 const scrapper =  async () => {
+    //PAST 24 HOURS
     const urls = [
-        "https://www.linkedin.com/jobs/search?keywords=Backend%20Developer&location=India&locationId=&geoId=102713980&f_TPR=r604800&position=1&pageNum=0",
-        "https://www.linkedin.com/jobs/search?keywords=Frontend%20Developer&location=India&locationId=&geoId=102713980&f_TPR=r604800&position=1&pageNum=0",
-        "https://www.linkedin.com/jobs/search?keywords=Full+Stack+Engineer&location=India&locationId=&geoId=102713980&f_TPR=r604800"
+        "https://www.linkedin.com/jobs/search?keywords=Back%20End%20Developer&location=India&locationId=&geoId=102713980&f_TPR=r86400&position=1&pageNum=0",
+        "https://www.linkedin.com/jobs/search?keywords=FrontEnd%20Developer&location=India&locationId=&geoId=102713980&f_TPR=r86400&position=1&pageNum=0",
+        "https://www.linkedin.com/jobs/search?keywords=Full%20Stack%20Engineer&location=India&locationId=&geoId=102713980&f_TPR=r86400&position=1&pageNum=0"
     ]
+
+    // PAST 1 WEEK
+    // const urls = [
+    //     "https://www.linkedin.com/jobs/search?keywords=Backend%20Developer&location=India&locationId=&geoId=102713980&f_TPR=r604800&position=1&pageNum=0",
+    //     "https://www.linkedin.com/jobs/search?keywords=Frontend%20Developer&location=India&locationId=&geoId=102713980&f_TPR=r604800&position=1&pageNum=0",
+    //     "https://www.linkedin.com/jobs/search?keywords=Full+Stack+Engineer&location=India&locationId=&geoId=102713980&f_TPR=r604800"
+    // ]
     const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
     try {
@@ -32,20 +40,27 @@ const scrapper =  async () => {
             jobType = jobType.replace(/\+/g, " ");
 
             await page.goto(url);
-            // await page.goto("https://www.linkedin.com/jobs/search?trk=guest_homepage-basic_guest_nav_menu_jobs&position=1&pageNum=0");
 
-            await page.waitForSelector('.base-search-bar__form', { timeout: 60000 });
+            await page.waitForSelector('.jobs-search__results-list', { timeout: 60000 });
 
-            // await page.screenshot({ path: "photo1.png", fullPage: true });
 
             try {
                 const jobs = await page.evaluate(async () => {
+                    await new Promise((resolve) => {
+                        const interval = setInterval(() => {
+                          const element = document.querySelector('.jobs-search__results-list .job-search-card');
+                          if (element) {
+                            clearInterval(interval);
+                            resolve();
+                          }
+                        }, 100);
+                      });
                     const jobList = document.querySelectorAll(".jobs-search__results-list .job-search-card");
 
                     return Array.from(jobList, (e) => ({
                         company: e.querySelector(".base-search-card__info .base-search-card__subtitle").innerText,
                         jobTitle: e.querySelector(".base-search-card__info .base-search-card__title").innerText,
-                        applyLink: e.querySelector("a").href
+                        applyLink: e.querySelector(".base-card__full-link").href
                     }))
                 })
 
@@ -59,6 +74,9 @@ const scrapper =  async () => {
                     jobs.map(job => `<tr><td>${job.company}</td><td>${job.jobTitle}</td><td>${job.applyLink}</td></tr>`).join('') +
                     '</table>'
                 };
+
+
+
 
                 // Send the email
                 transporter.sendMail(mailOptions, (error, info) => {
@@ -81,8 +99,11 @@ const scrapper =  async () => {
 
 };
 
-const task = cron.schedule('0 9 * * *', () => {
+const task = cron.schedule('* * * * *', () => {
     scrapper();
 });
+// const task = cron.schedule('0 9 * * *', () => {
+//     scrapper();
+// });
 
 task.start();
