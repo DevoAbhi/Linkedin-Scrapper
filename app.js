@@ -112,7 +112,7 @@ const scrapper =  async () => {
 
 };
 
-const task = cron.schedule('* * * * *', () => {
+const task = cron.schedule('5 * * * *', () => {
     scrapper();
 });
 // const task = cron.schedule('0 9 * * *', () => {
