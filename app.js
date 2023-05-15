@@ -31,10 +31,15 @@ const scrapper =  async () => {
 
     const browser = await puppeteer.launch({
         args: [
-            "--disable-setuid-sandbox",
-            '--disable-site-isolation-trials',
-            "--no-sandbox",
-            "--no-zygote"
+            '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--disable-setuid-sandbox',
+        '--no-first-run',
+        '--no-sandbox',
+        '--no-zygote',
+        '--deterministic-fetch',
+        '--disable-features=IsolateOrigins',
+        '--disable-site-isolation-trials',
         ],
         headless: "new",
         executablePath: process.env.NODE_ENV === "production" ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath()
