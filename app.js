@@ -28,6 +28,7 @@ const scrapper =  async () => {
     //     "https://www.linkedin.com/jobs/search?keywords=Frontend%20Developer&location=India&locationId=&geoId=102713980&f_TPR=r604800&position=1&pageNum=0",
     //     "https://www.linkedin.com/jobs/search?keywords=Full+Stack+Engineer&location=India&locationId=&geoId=102713980&f_TPR=r604800"
     // ]
+
     const browser = await puppeteer.launch({
         args: [
             "--disable-setuid-sandbox",
@@ -100,9 +101,12 @@ const scrapper =  async () => {
             }
         }
 
-        await browser.close();
     } catch (error) {
         console.log(error.message);
+    }
+
+    finally{
+        await browser.close();
     }
 
 
