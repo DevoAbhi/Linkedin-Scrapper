@@ -32,8 +32,8 @@ const scrapper =  async () => {
     const browser = await puppeteer.launch({
         args: [
             "--disable-setuid-sandbox",
+            '--disable-site-isolation-trials',
             "--no-sandbox",
-            "--single-process",
             "--no-zygote"
         ],
         headless: "new",
