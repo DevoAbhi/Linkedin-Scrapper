@@ -1,131 +1,190 @@
+// const puppeteer = require("puppeteer");
+// const dotenv = require('dotenv');
+// const nodemailer = require('nodemailer');
+// const cron = require('node-cron');
+
+// dotenv.config();
+
+// const transporter = nodemailer.createTransport({
+//     service: 'gmail',
+//     auth: {
+//         user: process.env.EMAIL,
+//         pass: process.env.PASSWORD
+//     }
+// });
+
+
+// const scrapper =  async () => {
+//     //PAST 24 HOURS
+//     const urls = [
+//         "https://www.linkedin.com/jobs/search?keywords=Back%20End%20Developer&location=India&locationId=&geoId=102713980&f_TPR=r86400&position=1&pageNum=0",
+//         "https://www.linkedin.com/jobs/search?keywords=FrontEnd%20Developer&location=India&locationId=&geoId=102713980&f_TPR=r86400&position=1&pageNum=0",
+//         "https://www.linkedin.com/jobs/search?keywords=Full%20Stack%20Engineer&location=India&locationId=&geoId=102713980&f_TPR=r86400&position=1&pageNum=0"
+//     ]
+
+//     // PAST 1 WEEK
+//     // const urls = [
+//     //     "https://www.linkedin.com/jobs/search?keywords=Backend%20Developer&location=India&locationId=&geoId=102713980&f_TPR=r604800&position=1&pageNum=0",
+//     //     "https://www.linkedin.com/jobs/search?keywords=Frontend%20Developer&location=India&locationId=&geoId=102713980&f_TPR=r604800&position=1&pageNum=0",
+//     //     "https://www.linkedin.com/jobs/search?keywords=Full+Stack+Engineer&location=India&locationId=&geoId=102713980&f_TPR=r604800"
+//     // ]
+
+//     const browser = await puppeteer.launch({
+//         args: [
+//         //     '--disable-gpu',
+//         // '--disable-dev-shm-usage',
+//         // '--disable-setuid-sandbox',
+//         // '--no-first-run',
+//         // '--no-sandbox',
+//         // '--no-zygote',
+//         // '--deterministic-fetch',
+//         // '--disable-features=IsolateOrigins',
+//         // '--disable-site-isolation-trials',
+//         '--no-sandbox',
+//         '--disable-setuid-sandbox',
+//         '--disable-dev-shm-usage',
+//         '--single-process'
+//         ],
+//         headless: true,
+//         executablePath: process.env.NODE_ENV === "production" ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath()
+//     });
+//     const page = await browser.newPage();
+//     try {
+//         for (const url of urls) {
+//             const str = url.split("/")[4];
+//             const queryParams = str.split("?")[1];
+//             let jobType = queryParams.split("&")[0].substring(9);
+
+//             jobType = jobType.replace(/%20/g, " ");
+//             jobType = jobType.replace(/\+/g, " ");
+
+//             await page.goto(url);
+
+//             await page.waitForSelector('.jobs-search__results-list', { timeout: 60000 });
+
+
+//             try {
+//                 const jobs = await page.evaluate(async () => {
+//                     await new Promise((resolve) => {
+//                         const interval = setInterval(() => {
+//                           const element = document.querySelector('.jobs-search__results-list .job-search-card');
+//                           if (element) {
+//                             clearInterval(interval);
+//                             resolve();
+//                           }
+//                         }, 100);
+//                       });
+//                     const jobList = document.querySelectorAll(".jobs-search__results-list .job-search-card");
+
+//                     return Array.from(jobList, (e) => ({
+//                         company: e.querySelector(".base-search-card__info .base-search-card__subtitle").innerText,
+//                         jobTitle: e.querySelector(".base-search-card__info .base-search-card__title").innerText,
+//                         applyLink: e.querySelector(".base-card__full-link").href
+//                     }))
+//                 })
+
+//                 const mailOptions = {
+//                     from: "lakshmiroy52@gmail.com",
+//                     to: 'abhinabroy2001@gmail.com',
+//                     subject: `${jobType} jobs from Linkedin by Abhinab 🔥`,
+//                     html: '<h1>Job openings</h1>' +
+//                     '<table>' +
+//                     '<tr><th>Company</th><th>Job Title</th><th>Apply Link</th></tr>' +
+//                     jobs.map(job => `<tr><td>${job.company}</td><td>${job.jobTitle}</td><td>${job.applyLink}</td></tr>`).join('') +
+//                     '</table>'
+//                 };
+
+
+
+
+//                 // Send the email
+//                 transporter.sendMail(mailOptions, (error, info) => {
+//                     if (error) {
+//                         console.log(error);
+//                     } else {
+//                         console.log('Email sent: ' + info.response);
+//                     }
+//                 });
+//             } catch (error) {
+//                 console.log("Error 1 -> ", error.message)
+//             }
+//         }
+
+//     } catch (error) {
+//         console.log(error.message);
+//     }
+
+//     finally{
+//         await browser.close();
+//     }
+
+
+// };
+
+// const task = cron.schedule('5 * * * *', () => {
+//     scrapper();
+// });
+// // const task = cron.schedule('0 9 * * *', () => {
+// //     scrapper();
+// // });
+
+// task.start();
+
+
+
 const puppeteer = require("puppeteer");
-const dotenv = require('dotenv');
-const nodemailer = require('nodemailer');
+require("dotenv").config();
 const cron = require('node-cron');
 
-dotenv.config();
-
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL,
-        pass: process.env.PASSWORD
-    }
-});
-
-
-const scrapper =  async () => {
-    //PAST 24 HOURS
-    const urls = [
-        "https://www.linkedin.com/jobs/search?keywords=Back%20End%20Developer&location=India&locationId=&geoId=102713980&f_TPR=r86400&position=1&pageNum=0",
-        "https://www.linkedin.com/jobs/search?keywords=FrontEnd%20Developer&location=India&locationId=&geoId=102713980&f_TPR=r86400&position=1&pageNum=0",
-        "https://www.linkedin.com/jobs/search?keywords=Full%20Stack%20Engineer&location=India&locationId=&geoId=102713980&f_TPR=r86400&position=1&pageNum=0"
-    ]
-
-    // PAST 1 WEEK
-    // const urls = [
-    //     "https://www.linkedin.com/jobs/search?keywords=Backend%20Developer&location=India&locationId=&geoId=102713980&f_TPR=r604800&position=1&pageNum=0",
-    //     "https://www.linkedin.com/jobs/search?keywords=Frontend%20Developer&location=India&locationId=&geoId=102713980&f_TPR=r604800&position=1&pageNum=0",
-    //     "https://www.linkedin.com/jobs/search?keywords=Full+Stack+Engineer&location=India&locationId=&geoId=102713980&f_TPR=r604800"
-    // ]
-
-    const browser = await puppeteer.launch({
-        args: [
-        //     '--disable-gpu',
-        // '--disable-dev-shm-usage',
-        // '--disable-setuid-sandbox',
-        // '--no-first-run',
-        // '--no-sandbox',
-        // '--no-zygote',
-        // '--deterministic-fetch',
-        // '--disable-features=IsolateOrigins',
-        // '--disable-site-isolation-trials',
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--single-process'
-        ],
-        headless: true,
-        executablePath: process.env.NODE_ENV === "production" ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath()
-    });
+const scrapeLogic = async () => {
+  const browser = await puppeteer.launch({
+    args: [
+      "--disable-setuid-sandbox",
+      "--no-sandbox",
+      "--single-process",
+      "--no-zygote",
+    ],
+    executablePath:
+      process.env.NODE_ENV === "production"
+        ? process.env.PUPPETEER_EXECUTABLE_PATH
+        : puppeteer.executablePath(),
+  });
+  try {
     const page = await browser.newPage();
-    try {
-        for (const url of urls) {
-            const str = url.split("/")[4];
-            const queryParams = str.split("?")[1];
-            let jobType = queryParams.split("&")[0].substring(9);
 
-            jobType = jobType.replace(/%20/g, " ");
-            jobType = jobType.replace(/\+/g, " ");
+    await page.goto("https://developer.chrome.com/");
 
-            await page.goto(url);
+    // Set screen size
+    await page.setViewport({ width: 1080, height: 1024 });
 
-            await page.waitForSelector('.jobs-search__results-list', { timeout: 60000 });
+    // Type into search box
+    await page.type(".search-box__input", "automate beyond recorder");
 
+    // Wait and click on first result
+    const searchResultSelector = ".search-box__link";
+    await page.waitForSelector(searchResultSelector);
+    await page.click(searchResultSelector);
 
-            try {
-                const jobs = await page.evaluate(async () => {
-                    await new Promise((resolve) => {
-                        const interval = setInterval(() => {
-                          const element = document.querySelector('.jobs-search__results-list .job-search-card');
-                          if (element) {
-                            clearInterval(interval);
-                            resolve();
-                          }
-                        }, 100);
-                      });
-                    const jobList = document.querySelectorAll(".jobs-search__results-list .job-search-card");
+    // Locate the full title with a unique string
+    const textSelector = await page.waitForSelector(
+      "text/Customize and automate"
+    );
+    const fullTitle = await textSelector.evaluate((el) => el.textContent);
 
-                    return Array.from(jobList, (e) => ({
-                        company: e.querySelector(".base-search-card__info .base-search-card__subtitle").innerText,
-                        jobTitle: e.querySelector(".base-search-card__info .base-search-card__title").innerText,
-                        applyLink: e.querySelector(".base-card__full-link").href
-                    }))
-                })
+    // Print the full title
+    const logStatement = `The title of this blog post is ${fullTitle}`;
+    console.log(logStatement);
 
-                const mailOptions = {
-                    from: "lakshmiroy52@gmail.com",
-                    to: 'abhinabroy2001@gmail.com',
-                    subject: `${jobType} jobs from Linkedin by Abhinab 🔥`,
-                    html: '<h1>Job openings</h1>' +
-                    '<table>' +
-                    '<tr><th>Company</th><th>Job Title</th><th>Apply Link</th></tr>' +
-                    jobs.map(job => `<tr><td>${job.company}</td><td>${job.jobTitle}</td><td>${job.applyLink}</td></tr>`).join('') +
-                    '</table>'
-                };
+  } catch (e) {
+    console.error(e);
 
-
-
-
-                // Send the email
-                transporter.sendMail(mailOptions, (error, info) => {
-                    if (error) {
-                        console.log(error);
-                    } else {
-                        console.log('Email sent: ' + info.response);
-                    }
-                });
-            } catch (error) {
-                console.log("Error 1 -> ", error.message)
-            }
-        }
-
-    } catch (error) {
-        console.log(error.message);
-    }
-
-    finally{
-        await browser.close();
-    }
-
-
+  } finally {
+    await browser.close();
+  }
 };
 
 const task = cron.schedule('5 * * * *', () => {
-    scrapper();
+    scrapeLogic();
 });
-// const task = cron.schedule('0 9 * * *', () => {
-//     scrapper();
-// });
 
 task.start();
